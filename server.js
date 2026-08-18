@@ -80,7 +80,25 @@ function runYtDlpCapture(args) {
   });
 }
 
-const PLAYER_CLIENTS = ['youtube:player_client=default,android', 'youtube:player_client=android'];
+const PLAYER_CLIENTS = [
+  'youtube:player_client=default,android_vr',
+  'youtube:player_client=android_vr',
+  'youtube:player_client=web,web_safari,android',
+  'youtube:player_client=mweb',
+  'youtube:player_client=tv_embedded',
+];
+
+async function runYtDlpWithFallback(args) {
+  let lastError = '';
+  for (const client of PLAYER_CLIENTS) {
+    try {
+      return await runYtDlp([...args, '--extractor-args', client]);
+    } catch (err) {
+      lastError = err.message;
+    }
+  }
+  throw new Error(lastError);
+}
 
 function buildMp4Format(quality) {
   const q = QUALITY_OPTIONS.includes(String(quality)) ? String(quality) : '1080';
@@ -107,11 +125,9 @@ async function downloadVideo({ url, format, quality }) {
 
   let filename;
   try {
-    const meta = await runYtDlp([
+    const meta = await runYtDlpWithFallback([
       '--no-playlist',
       '--no-warnings',
-      '--extractor-args',
-      'youtube:player_client=default,android',
       '--skip-download',
       '--print',
       '%(title)s',
@@ -229,12 +245,10 @@ app.post('/api/info', async (req, res) => {
   if (!url) return res.status(400).json({ error: 'Please provide a video URL.' });
 
   try {
-    const stdout = await runYtDlp([
+    const stdout = await runYtDlpWithFallback([
       '--dump-single-json',
       '--no-playlist',
       '--no-warnings',
-      '--extractor-args',
-      'youtube:player_client=default,android',
       url,
     ]);
     const info = JSON.parse(stdout);
