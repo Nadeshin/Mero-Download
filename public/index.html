@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DownloadTube - High Quality YouTube MP4 & MP3 Downloader</title>
+  <meta name="description"
+    content="Fast, free, and easy YouTube video and audio downloader. Convert YouTube videos to MP4 or MP3 in 1080p and HD quality." />
+
+  <!-- Google Fonts & Remix Icon -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+
+  <!-- Navbar Header -->
+  <nav class="navbar">
+    <div class="container nav-container">
+      <a href="#" class="brand">
+        <div class="brand-icon">
+          <i class="ri-youtube-fill"></i>
+        </div>
+        <div class="brand-title">Download<span>Tube</span></div>
+      </a>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <main class="hero">
+    <div class="container">
+      <div class="hero-header">
+        <h1 class="hero-title">Download <span>YouTube Videos</span> & Audio Instantly</h1>
+        <p class="hero-subtitle">Convert and save high quality MP4 videos up to 1080p or extract crisp MP3 audio in
+          seconds.</p>
+      </div>
+
+      <!-- Main Downloader Card -->
+      <div class="downloader-card">
+        <div class="card-body">
+          <form id="form">
+
+            <!-- Video URL Input -->
+            <div class="field-group">
+              <div class="field-label">
+                <label for="url">YouTube Video Link</label>
+                <span class="sub-label">Paste link below</span>
+              </div>
+              <div class="input-wrapper">
+                <i class="ri-link-m input-icon"></i>
+                <input type="url" id="url" class="url-input" placeholder="https://www.youtube.com/watch?v=..." required
+                  autocomplete="off" />
+                <div class="input-actions">
+                  <button type="button" id="btnPaste" class="btn-input-action" title="Paste from clipboard">
+                    <i class="ri-clipboard-line"></i> Paste
+                  </button>
+                  <button type="button" id="btnClear" class="btn-input-action" style="display:none" title="Clear input">
+                    <i class="ri-close-line"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Format Selection -->
+            <div class="field-group">
+              <div class="field-label">
+                <label>Select Format</label>
+              </div>
+              <div class="formats-grid" id="formats">
+                <div class="format-card format active" data-format="mp4">
+                  <div class="format-icon-wrap">
+                    <i class="ri-movie-2-line"></i>
+                  </div>
+                  <div class="format-info">
+                    <span class="format-name">MP4 Video</span>
+                    <span class="format-desc">Full HD & Audio</span>
+                  </div>
+                  <i class="ri-checkbox-circle-fill format-check"></i>
+                </div>
+
+                <div class="format-card format" data-format="mp3">
+                  <div class="format-icon-wrap">
+                    <i class="ri-music-2-line"></i>
+                  </div>
+                  <div class="format-info">
+                    <span class="format-name">MP3 Audio</span>
+                    <span class="format-desc">High Quality Audio</span>
+                  </div>
+                  <i class="ri-checkbox-circle-fill format-check"></i>
+                </div>
+              </div>
+            </div>
+
+            <!-- Quality Option Dropdown -->
+            <div class="field-group" id="qualityField">
+              <div class="field-label">
+                <label for="quality">Video Quality</label>
+              </div>
+              <div class="select-wrapper">
+                <select id="quality" class="custom-select">
+                  <option value="1080" selected>1080p (Full HD)</option>
+                  <option value="720">720p (HD)</option>
+                  <option value="480">480p (SD)</option>
+                  <option value="360">360p (Low)</option>
+                  <option value="best">Best Available</option>
+                </select>
+                <i class="ri-arrow-down-s-line select-arrow"></i>
+              </div>
+            </div>
+
+            <!-- Video Information Preview Box -->
+            <div id="info" class="info-card hidden">
+              <div class="thumb-wrapper">
+                <img id="infoThumb" class="thumb-img" alt="Video Thumbnail" />
+                <span id="infoDuration" class="duration-badge"></span>
+              </div>
+              <div class="info-details">
+                <h4 id="infoTitle" class="info-title"></h4>
+                <div class="info-pills">
+                  <span id="infoUploader" class="meta-pill"></span>
+                  <span id="infoSize" class="meta-pill highlight"></span>
+                </div>
+                <div id="infoMeta" style="display:none"></div>
+              </div>
+            </div>
+
+            <!-- Download Button -->
+            <button type="submit" id="dlBtn" class="btn-download" style="display:none">
+              <i class="ri-download-2-line"></i>
+              <span>Download Now</span>
+            </button>
+
+            <!-- Progress Bar Card -->
+            <div id="progressWrap" class="progress-card" style="display:none">
+              <div class="progress-header">
+                <div class="progress-status-text">
+                  <i class="ri-loader-4-line ri-spin" style="color: var(--red-primary)"></i>
+                  <span id="progressLabel">Processing...</span>
+                </div>
+                <span id="progressPct" class="progress-pct">0%</span>
+              </div>
+              <div class="progress-track">
+                <div class="progress-bar" id="progressBar"></div>
+              </div>
+            </div>
+
+            <!-- Status Message & Alert -->
+            <div id="status" class="status-msg"></div>
+
+            <div id="refreshHint" class="refresh-alert" style="display:none">
+              <i class="ri-alert-line" style="font-size: 20px;"></i>
+              <div>Something went wrong. Please refresh the page (F5) and try again.</div>
+            </div>
+
+          </form>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Features Grid Section -->
+  <section class="features-section">
+    <div class="container">
+      <h2 class="section-title">Why Use DownloadTube?</h2>
+      <div class="features-grid">
+
+        <div class="feature-card">
+          <div class="feature-icon-wrap">
+            <i class="ri-flashlight-line"></i>
+          </div>
+          <h3 class="feature-title">Ultra Fast Speed</h3>
+          <p class="feature-desc">Powered by high speed server conversion so you get your MP4 and MP3 files downloaded
+            in seconds.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon-wrap">
+            <i class="ri-hd-line"></i>
+          </div>
+          <h3 class="feature-title">Up to 1080p HD</h3>
+          <p class="feature-desc">Download videos in crisp 1080p Full HD resolution with clear audio track merging.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon-wrap">
+            <i class="ri-music-line"></i>
+          </div>
+          <h3 class="feature-title">Crystal Clear MP3</h3>
+          <p class="feature-desc">Extract high bitrate audio from any music video, podcast, or stream automatically.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon-wrap">
+            <i class="ri-shield-check-line"></i>
+          </div>
+          <h3 class="feature-title">100% Free & Safe</h3>
+          <p class="feature-desc">No accounts required, no software installation, completely free of malware and popup
+            ads.</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- How to Download Section -->
+  <section class="how-it-works">
+    <div class="container">
+      <h2 class="section-title">How to Download</h2>
+      <div class="steps-grid">
+
+        <div class="step-card">
+          <div class="step-number">1</div>
+          <div class="step-content">
+            <h3>Copy YouTube Link</h3>
+            <p>Copy the web link of the video you want to save from YouTube app or website.</p>
+          </div>
+        </div>
+
+        <div class="step-card">
+          <div class="step-number">2</div>
+          <div class="step-content">
+            <h3>Paste & Select Format</h3>
+            <p>Paste the link in the input box above and choose MP4 video or MP3 audio.</p>
+          </div>
+        </div>
+
+        <div class="step-card">
+          <div class="step-number">3</div>
+          <div class="step-content">
+            <h3>Click Download</h3>
+            <p>Hit the Download button to start processing and save the file directly to your device.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ Section -->
+  <section class="faq-section">
+    <div class="container">
+      <h2 class="section-title">Frequently Asked Questions</h2>
+      <div class="faq-grid">
+        <div class="faq-item">
+          <div class="faq-question"><i class="ri-question-line"></i> Is DownloadTube completely free?</div>
+          <div class="faq-answer">Yes! You can download as many YouTube videos and audio files as you want completely
+            free.</div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-question"><i class="ri-question-line"></i> What video qualities are supported?</div>
+          <div class="faq-answer">We support 360p, 480p, 720p HD, and 1080p Full HD video resolution outputs.</div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-question"><i class="ri-question-line"></i> Where are saved files stored on my computer?</div>
+          <div class="faq-answer">Downloaded files are saved in your browser's default "Downloads" folder or directory.
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container footer-content">
+      <div class="footer-logo">
+        <i class="ri-youtube-fill" style="color: var(--red-primary)"></i>
+        Download<span>Tube</span>
+      </div>
+      <p>&copy; 2026 DownloadTube.</p>
+    </div>
+  </footer>
+
+  <!-- Client Script -->
+  <script>
+    const form = document.getElementById('form');
+    const urlInput = document.getElementById('url');
+    const dlBtn = document.getElementById('dlBtn');
+    const progressWrap = document.getElementById('progressWrap');
+    const progressBar = document.getElementById('progressBar');
+    const progressLabel = document.getElementById('progressLabel');
+    const progressPct = document.getElementById('progressPct');
+    const statusEl = document.getElementById('status');
+    const refreshHint = document.getElementById('refreshHint');
+    const infoBox = document.getElementById('info');
+    const infoTitle = document.getElementById('infoTitle');
+    const infoMeta = document.getElementById('infoMeta');
+    const infoThumb = document.getElementById('infoThumb');
+    const infoDuration = document.getElementById('infoDuration');
+    const infoUploader = document.getElementById('infoUploader');
+    const infoSize = document.getElementById('infoSize');
+    const btnPaste = document.getElementById('btnPaste');
+    const btnClear = document.getElementById('btnClear');
+
+    let selectedFormat = 'mp4';
+    let selectedQuality = '1080';
+    let lastUrl = '';
+
+    const qualityField = document.getElementById('qualityField');
+
+    // Paste & Clear handlers
+    btnPaste.addEventListener('click', async () => {
+      try {
+        const text = await navigator.clipboard.readText();
+        if (text) {
+          urlInput.value = text;
+          btnClear.style.display = 'inline-flex';
+          fetchInfo(text.trim());
+        }
+      } catch (err) {
+        urlInput.focus();
+      }
+    });
+
+    btnClear.addEventListener('click', () => {
+      urlInput.value = '';
+      btnClear.style.display = 'none';
+      dlBtn.style.display = 'none';
+      infoBox.classList.add('hidden');
+      setStatus('');
+      urlInput.focus();
+    });
+
+    // Format Cards Switching
+    document.querySelectorAll('.format').forEach(el => {
+      el.addEventListener('click', () => {
+        document.querySelectorAll('.format').forEach(e => e.classList.remove('active'));
+        el.classList.add('active');
+        selectedFormat = el.dataset.format;
+        qualityField.style.display = selectedFormat === 'mp4' ? '' : 'none';
+        refetchIfNeeded();
+      });
+    });
+
+    document.getElementById('quality').addEventListener('change', (e) => {
+      selectedQuality = e.target.value;
+      refetchIfNeeded();
+    });
+
+    function setStatus(msg, isError = false) {
+      statusEl.textContent = msg;
+      statusEl.className = isError ? 'status-msg error' : 'status-msg';
+      refreshHint.style.display = isError ? '' : 'none';
+    }
+
+    function getUrl() {
+      return urlInput.value.trim();
+    }
+
+    async function fetchInfo(url, keepVisible = false) {
+      if (!url) {
+        infoBox.classList.add('hidden');
+        btnClear.style.display = 'none';
+        dlBtn.style.display = 'none';
+        return;
+      }
+      btnClear.style.display = 'inline-flex';
+      setStatus('Fetching video details...');
+      if (!keepVisible) infoBox.classList.add('hidden');
+
+      try {
+        const res = await fetch('/api/info', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url, format: selectedFormat, quality: selectedQuality })
+        });
+        const data = await res.json();
+        if (!res.ok) { dlBtn.style.display = 'none'; setStatus(data.error || 'Failed to fetch info.', true); return; }
+        lastUrl = url;
+
+        infoThumb.src = data.thumbnail || '';
+        infoThumb.style.display = data.thumbnail ? '' : 'none';
+        infoTitle.textContent = data.title || 'YouTube Video';
+
+        if (data.duration) {
+          infoDuration.textContent = data.duration;
+          infoDuration.style.display = 'inline-block';
+        } else {
+          infoDuration.style.display = 'none';
+        }
+
+        infoUploader.innerHTML = `<i class="ri-user-3-line"></i> ${data.uploader || 'YouTube'}`;
+
+        if (data.sizeLabel) {
+          infoSize.innerHTML = `<i class="ri-hard-drive-2-line"></i> ~${data.sizeLabel}`;
+          infoSize.style.display = 'inline-flex';
+        } else {
+          infoSize.style.display = 'none';
+        }
+
+        infoMeta.textContent = [
+          data.uploader,
+          data.duration ? `Duration: ${data.duration}` : null,
+          data.sizeLabel ? `Size: ~${data.sizeLabel}` : null
+        ].filter(Boolean).join('  •  ');
+
+        infoBox.classList.remove('hidden');
+        dlBtn.style.display = '';
+        setStatus('');
+      } catch (e) {
+        dlBtn.style.display = 'none';
+        setStatus('Network error. Is the server running?', true);
+      }
+    }
+
+    function refetchIfNeeded() {
+      const url = getUrl();
+      if (url) fetchInfo(url, true);
+    }
+
+    let debounceTimer;
+    urlInput.addEventListener('input', () => {
+      const url = getUrl();
+      if (!url) {
+        infoBox.classList.add('hidden');
+        btnClear.style.display = 'none';
+        dlBtn.style.display = 'none';
+        setStatus('');
+        return;
+      }
+      btnClear.style.display = 'inline-flex';
+      dlBtn.style.display = 'none';
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => fetchInfo(url), 700);
+    });
+
+    urlInput.addEventListener('paste', () => setTimeout(() => fetchInfo(getUrl()), 100));
+
+    function setIndeterminate(on) {
+      progressBar.classList.toggle('indeterminate', on);
+      progressBar.style.width = on ? '' : '0%';
+    }
+
+    function triggerBlobDownload(blob, filename) {
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(blobUrl);
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const url = getUrl();
+      if (!url) { setStatus('Please paste a valid YouTube video link.', true); return; }
+
+      setStatus('');
+      dlBtn.disabled = true;
+      dlBtn.querySelector('span').textContent = 'Processing...';
+      progressWrap.style.display = 'block';
+      setIndeterminate(true);
+      progressPct.textContent = '…';
+      progressLabel.textContent = 'Processing your request. This can take up to a few minutes depending on the video.';
+
+      try {
+        const res = await fetch('/api/download', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url, format: selectedFormat, quality: selectedQuality })
+        });
+
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          throw new Error(data.error || 'Download failed.');
+        }
+
+        const disposition = res.headers.get('Content-Disposition') || '';
+        const match = disposition.match(/filename="?(.+?)"?\s*;?$/);
+        const filename = match ? match[1] : `video.${selectedFormat}`;
+
+        setIndeterminate(false);
+        setProgress(100, 'Saving file to device...');
+        const blob = await res.blob();
+        triggerBlobDownload(blob, filename);
+        setStatus(`Successfully downloaded: ${filename}`);
+        statusEl.className = 'status-msg success';
+      } catch (err) {
+        setStatus(err.message || 'Network error. Is the server running?', true);
+      } finally {
+        dlBtn.disabled = false;
+        dlBtn.querySelector('span').textContent = 'Download Now';
+        progressWrap.style.display = 'none';
+        setIndeterminate(false);
+      }
+    });
+  </script>
+</body>
+
+</html>
