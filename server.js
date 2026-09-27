@@ -1,4 +1,4 @@
-import { createReadStream, existsSync } from 'fs';
+import { createReadStream, existsSync, writeFileSync } from 'fs';
 import { promises as fsp } from 'fs';
 import { tmpdir } from 'os';
 import { dirname, join } from 'path';
@@ -21,6 +21,21 @@ const YTDLP_BIN = process.platform === 'win32' ? 'yt-dlp.exe' : 'yt-dlp_linux';
 const YTDLP_PATH = process.env.YTDLP_PATH || join(__dirname, 'bin', YTDLP_BIN);
 
 const QUALITY_OPTIONS = ['360', '480', '720', '1080', 'best'];
+
+// ponytail: cookies file ditulis sinkron tiap call, file kecil (<50KB)
+function getCookiesArgs() {
+  const b64 = process.env.YT_COOKIES_B64;
+  const raw = process.env.YT_COOKIES;
+  if (!b64 && !raw) return [];
+  const p = join(tmpdir(), 'yt-cookies.txt');
+  try {
+    if (b64) writeFileSync(p, Buffer.from(b64.replace(/\s/g, ''), 'base64'));
+    else writeFileSync(p, raw.replace(/\\n/g, '\n'));
+    return ['--cookies', p];
+  } catch {
+    return [];
+  }
+}
 
 async function ensureTempDir() {
   await fsp.mkdir(DOWNLOAD_DIR, { recursive: true });
@@ -47,7 +62,7 @@ function todayStr() {
 
 function runYtDlp(args) {
   return new Promise((resolve, reject) => {
-    const proc = spawn(YTDLP_PATH, args);
+    const proc = spawn(YTDLP_PATH, [...getCookiesArgs(), ...args]);
     let stdout = '';
     let stderr = '';
     proc.stdout.on('data', (d) => (stdout += d.toString()));
@@ -65,7 +80,7 @@ function runYtDlp(args) {
 
 function runYtDlpCapture(args) {
   return new Promise((resolve) => {
-    const proc = spawn(YTDLP_PATH, args);
+    const proc = spawn(YTDLP_PATH, [...getCookiesArgs(), ...args]);
     let stderr = '';
     proc.stdout.on('data', () => {});
     proc.stderr.on('data', (d) => (stderr += d.toString()));
@@ -203,7 +218,7 @@ async function downloadVideo({ url, format, quality }) {
 }
 
 app.get('/api/health', (_req, res) => {
-  res.json({ ok: true, ytdlp: existsSync(YTDLP_PATH), ffmpeg: !!ffmpegPath });
+  res.json({ ok: true, ytdlp: existsSync(YTDLP_PATH), ffmpeg: !!ffmpegPath, cookies: !!(process.env.YT_COOKIES || process.env.YT_COOKIES_B64) });
 });
 
 function formatBytes(bytes) {
